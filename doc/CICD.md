@@ -1,5 +1,7 @@
 # Austin CI/CD：本机 WSL 演练
 
+本次 GitHub CI 与本机手动发布、部署的逐步操作和每一步的含义，见 [操作记录与复现步骤](CICD-WALKTHROUGH.md)。
+
 目标是亲手跑通 CI/CD 并能在面试中准确说明。当前 `hxy123-google/ci-cd` 是公开仓库：先用 GitHub 托管 Runner 验证提交触发的 CI；本机 WSL 已手动验证 Harbor 镜像发布、Docker Compose 部署和自动回退。当前暂不在公开仓库接入 WSL 自托管 Runner，因此 GitHub 不会自动执行发布与部署。以后若改为私有仓库，可按第 4、5 节接通自动流程。
 
 ## 1. 演练架构
@@ -19,13 +21,13 @@
 
 ## 2. 准备个人 GitHub 仓库
 
-个人仓库 `https://github.com/hxy123-google/ci-cd` 已创建且为空，默认分支是 `main`。本地 `origin` 仍指向项目作者 `ZhongFuCheng3y/austin`，个人仓库已作为 `myrepo` 远程添加。检查远程：
+个人仓库 `https://github.com/hxy123-google/ci-cd` 已创建并完成首次推送，默认分支是 `main`。本地 `origin` 仍指向项目作者 `ZhongFuCheng3y/austin`，个人仓库已作为 `myrepo` 远程添加。检查远程：
 
 ```bash
 git remote -v
 ```
 
-当前个人仓库的默认分支是 `main`，本地项目分支是 `master`，仓库已经由 Git 初始化，因此不要再执行 GitHub 页面上的 `git init`、`git branch -M main` 或覆盖上游 `origin`。首次提交范围需要单独核对。本工作区还存在大量包名迁移、Kafka 等未提交改动；用独立工作区准备 CI/CD 提交，避免把这些改动一起推送。CI 先运行部署回退脚本测试与 Maven 打包；现有 Java 测试依赖外部服务，演练阶段没有纳入自动测试。
+当前个人仓库的默认分支是 `main`，原工作区本地分支是 `master`，仓库已经由 Git 初始化，因此不要再执行 GitHub 页面上的 `git init`、`git branch -M main` 或覆盖上游 `origin`。首次提交已在独立工作区完成，提交号为 `1e733713eae8bb6b42841849f2aebe167c14d364`；原工作区的大量包名迁移、Kafka 等未提交改动没有进入个人仓库。后续提交仍应先核对范围。CI 运行部署回退脚本测试与 Maven 打包；现有 Java 测试依赖外部服务，演练阶段没有纳入自动测试。
 
 ## 3. 在 WSL 安装本地 Harbor
 
@@ -135,7 +137,7 @@ bash deploy/prepare-local-app-wsl.sh
 bash deploy/exercise-local-rollback-wsl.sh
 ```
 
-此脚本在 Harbor 的私有 `lab-test` 项目中推送一个可用 Austin 镜像和一个故意错误的镜像，再调用同一个 `deploy.sh`，核对坏版本失败后 `current-image` 与健康状态恢复。`sha-111…`、`sha-222…` 是**演练专用的合成标签**，不对应 Git 提交，不应作为正式发布版本。执行后本机应用停留在 `lab-test` 的可用镜像上；未来首次正式发布会把它记为上一个版本。初次部署没有旧镜像可恢复。Compose 单机更新会有短暂中断；镜像回退也不会回滚数据库结构或内容。
+此脚本在 Harbor 的私有 `lab-test` 项目中推送一个可用 Austin 镜像和一个故意错误的镜像，再调用同一个 `deploy.sh`，核对坏版本失败后 `current-image` 与健康状态恢复。`sha-111…`、`sha-222…` 是**演练专用的合成标签**，不对应 Git 提交，不应作为正式发布版本。执行后本机应用停留在 `lab-test` 的可用镜像上；本次正式发布已切换至 `demo` 项目的提交 SHA 镜像。若重新运行该脚本，当前应用会再次切换到演练镜像。初次部署没有旧镜像可恢复。Compose 单机更新会有短暂中断；镜像回退也不会回滚数据库结构或内容。
 
 ## 7. 面试时如实说明
 
