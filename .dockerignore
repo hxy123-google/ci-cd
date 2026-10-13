@@ -1,0 +1,10 @@
+**/target
+!austin-web/target
+austin-web/target/*
+!austin-web/target/austin-web-0.0.1-SNAPSHOT.jar
+.git
+.github
+.idea
+.vscode
+logs
+doc
